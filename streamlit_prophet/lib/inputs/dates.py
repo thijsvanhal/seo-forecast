@@ -185,13 +185,15 @@ def input_forecast_dates(
             seconds=timedelta_horizon
         )
     else:
-        dates["forecast_start_date"] = df.ds.max() + timedelta(days=1)
-        timedelta_horizon = convert_into_nb_of_days(
-            resampling["freq"][-1], dates["forecast_horizon"]
-        )
-        dates["forecast_end_date"] = dates["forecast_start_date"] + timedelta(
-            days=timedelta_horizon
-        )
+        # Get the frequency object from the resampling info
+        freq_offset = pd.tseries.frequencies.to_offset(resampling["freq"])
+        # Calculate the start date as the period *after* the last date in the data
+        dates["forecast_start_date"] = df.ds.max() + freq_offset
+        # Calculate the end date by adding the correct number of periods
+        # Use periods=horizon - 1 because the start date is already the first forecast point
+        end_period_offset = pd.tseries.frequencies.to_offset(resampling["freq"]) * (dates["forecast_horizon"] - 1)
+        dates["forecast_end_date"] = dates["forecast_start_date"] + end_period_offset
+
     dates["forecast_freq"] = str(resampling["freq"])
     print_forecast_dates(dates, resampling)
     return dates
