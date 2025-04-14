@@ -1,5 +1,6 @@
 [app]
 app_intro = """
+This app is built on top of the original Streamlit Prophet: https://github.com/artefactory/streamlit_prophet. Thanks Maxime!
 This app allows you to train, evaluate and optimize a Prophet model in just a few clicks.
 All you have to do is to upload a time series dataset, and follow the guidelines in the sidebar to:
 * __Prepare data__: Filter, aggregate, resample and/or clean your dataset.

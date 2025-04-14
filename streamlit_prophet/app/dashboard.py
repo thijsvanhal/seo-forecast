@@ -42,7 +42,7 @@ from streamlit_prophet.lib.inputs.params import (
     input_seasonality_params,
 )
 from streamlit_prophet.lib.models.prophet import forecast_workflow
-from streamlit_prophet.lib.utils.load import load_config, load_image
+from streamlit_prophet.lib.utils.load import load_config
 
 # Page config
 st.set_page_config(page_title="Prophet", layout="wide")
@@ -58,13 +58,11 @@ report: List[Dict[str, Any]] = []
 
 # Info
 with st.expander(
-    "Streamlit app to build a time series forecasting model in a few clicks", expanded=False
+    "Streamlit app to build a time series forecasting model in a few clicks", expanded=True
 ):
     st.write(readme["app"]["app_intro"])
     st.write("")
 st.write("")
-st.sidebar.image(load_image("logo.png"), use_column_width=True)
-display_links(readme["links"]["repo"], readme["links"]["article"])
 
 
 st.sidebar.title("1. Data")
