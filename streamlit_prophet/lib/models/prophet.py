@@ -264,5 +264,15 @@ def forecast_future(
     )
     models["future"] = instantiate_prophet_model(params, use_regressors=use_regressors, dates=dates)
     models["future"].fit(datasets["full"], seed=config["global"]["seed"])
-    forecasts["future"] = models["future"].predict(datasets["future"])
+
+    # Create a dataframe for prediction that includes BOTH historical and future dates
+    predict_df = pd.concat(
+        [datasets["full"], datasets["future"]], # Assumes datasets["future"] has 'ds' and any needed extra columns (regressors, cap/floor)
+        ignore_index=True,
+        sort=False
+    ).drop(columns=['y'], errors='ignore') # Drop 'y' as it's not needed for predict
+
+    # Make predictions on the combined dataframe
+    forecasts["future"] = models["future"].predict(predict_df)
+
     return datasets, models, forecasts
