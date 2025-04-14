@@ -3,18 +3,18 @@ from typing import Any, Dict, Tuple
 import pandas as pd
 import streamlit as st
 from streamlit_prophet.lib.exposition.export import display_config_download_links
-from streamlit_prophet.lib.utils.load import download_toy_dataset, load_custom_config, load_dataset
+from streamlit_prophet.lib.utils.load import load_custom_config, load_dataset
 
 
 def input_dataset(
     config: Dict[Any, Any], readme: Dict[Any, Any], instructions: Dict[Any, Any]
 ) -> Tuple[pd.DataFrame, Dict[Any, Any], Dict[Any, Any], Dict[Any, Any]]:
-    """Lets the user decide whether to upload a dataset or download a toy dataset.
+    """Lets the user upload a dataset.
 
     Parameters
     ----------
     config : Dict
-        Lib config dictionary containing information about toy datasets (download links).
+        Lib config dictionary.
     readme : Dict
         Dictionary containing tooltips to guide user's choices.
     instructions : Dict
@@ -25,63 +25,51 @@ def input_dataset(
     pd.DataFrame
         Selected dataset loaded into a dataframe.
     dict
-        Loading options selected by user (upload or download, dataset name if download).
+        Loading options selected by user.
     dict
         Lib configuration dictionary.
     dict
         Dictionary containing all datasets.
     """
     load_options, datasets = dict(), dict()
-    load_options["toy_dataset"] = st.checkbox(
-        "Load a toy dataset", True, help=readme["tooltips"]["upload_choice"]
+    file = st.file_uploader(
+        "Upload a csv file", type="csv", help=readme["tooltips"]["dataset_upload"]
     )
-    if load_options["toy_dataset"]:
-        dataset_name = st.selectbox(
-            "Select a toy dataset",
-            options=list(config["datasets"].keys()),
-            format_func=lambda x: config["datasets"][x]["name"],
-            help=readme["tooltips"]["toy_dataset"],
-        )
-        df = download_toy_dataset(config["datasets"][dataset_name]["url"])
-        load_options["dataset"] = dataset_name
-        load_options["date_format"] = config["dataprep"]["date_format"]
-        load_options["separator"] = ","
+    load_options["separator"] = st.selectbox(
+        "What is the separator?", [",", ";", "|"], help=readme["tooltips"]["separator"]
+    )
+    load_options["date_format"] = st.text_input(
+        "What is the date format?",
+        config["dataprep"]["date_format"],
+        help=readme["tooltips"]["date_format"],
+    )
+    if st.checkbox(
+        "Upload my own config file", False, help=readme["tooltips"]["custom_config_choice"]
+    ):
+        with st.sidebar.expander("Configuration", expanded=True):
+            display_config_download_links(
+                config,
+                "config.toml",
+                "Template",
+                instructions,
+                "instructions.toml",
+                "Instructions",
+            )
+            config_file = st.file_uploader(
+                "Upload custom config", type="toml", help=readme["tooltips"]["custom_config"]
+            )
+            if config_file:
+                config = load_custom_config(config_file)
+            else:
+                st.stop()
+    if file:
+        df = load_dataset(file, load_options)
     else:
-        file = st.file_uploader(
-            "Upload a csv file", type="csv", help=readme["tooltips"]["dataset_upload"]
-        )
-        load_options["separator"] = st.selectbox(
-            "What is the separator?", [",", ";", "|"], help=readme["tooltips"]["separator"]
-        )
-        load_options["date_format"] = st.text_input(
-            "What is the date format?",
-            config["dataprep"]["date_format"],
-            help=readme["tooltips"]["date_format"],
-        )
-        if st.checkbox(
-            "Upload my own config file", False, help=readme["tooltips"]["custom_config_choice"]
-        ):
-            with st.sidebar.expander("Configuration", expanded=True):
-                display_config_download_links(
-                    config,
-                    "config.toml",
-                    "Template",
-                    instructions,
-                    "instructions.toml",
-                    "Instructions",
-                )
-                config_file = st.file_uploader(
-                    "Upload custom config", type="toml", help=readme["tooltips"]["custom_config"]
-                )
-                if config_file:
-                    config = load_custom_config(config_file)
-                else:
-                    st.stop()
-        if file:
-            df = load_dataset(file, load_options)
-        else:
-            st.stop()
+        st.info("Please upload a CSV file to proceed.")
+        st.stop()
+
     datasets["uploaded"] = df.copy()
+    load_options['toy_dataset'] = False
     return df, load_options, config, datasets
 
 
@@ -93,13 +81,13 @@ def input_columns(
     Parameters
     ----------
     config : Dict
-        Lib config dictionary containing information about toy datasets (date and target column names).
+        Lib config dictionary.
     readme : Dict
         Dictionary containing tooltips to guide user's choices.
     df : pd.DataFrame
         Loaded dataset.
     load_options : Dict
-        Loading options selected by user (upload or download, dataset name if download).
+        Loading options selected by user (e.g., separator, date format).
 
     Returns
     -------
@@ -108,32 +96,18 @@ def input_columns(
     str
         Target column name.
     """
-    if load_options["toy_dataset"]:
-        date_col = st.selectbox(
-            "Date column",
-            [config["datasets"][load_options["dataset"]]["date"]],
-            help=readme["tooltips"]["date_column"],
-        )
-        target_col = st.selectbox(
-            "Target column",
-            [config["datasets"][load_options["dataset"]]["target"]],
-            help=readme["tooltips"]["target_column"],
-        )
-    else:
-        date_col = st.selectbox(
-            "Date column",
-            sorted(df.columns)
-            if config["columns"]["date"] in ["false", False]
-            else [config["columns"]["date"]],
-            help=readme["tooltips"]["date_column"],
-        )
-        target_col = st.selectbox(
-            "Target column",
-            sorted(set(df.columns) - {date_col})
-            if config["columns"]["target"] in ["false", False]
-            else [config["columns"]["target"]],
-            help=readme["tooltips"]["target_column"],
-        )
+    date_col = st.selectbox(
+        "Date column",
+        [config["columns"]["date"]] if config["columns"]["date"] not in [None, "false", False] and config["columns"]["date"] in df.columns else sorted(df.columns),
+        index=0,
+        help=readme["tooltips"]["date_column"],
+    )
+    target_col = st.selectbox(
+        "Target column",
+        [config["columns"]["target"]] if config["columns"]["target"] not in [None, "false", False] and config["columns"]["target"] in df.columns and config["columns"]["target"] != date_col else sorted(set(df.columns) - {date_col}),
+        index=0,
+        help=readme["tooltips"]["target_column"],
+    )
     return date_col, target_col
 
 
