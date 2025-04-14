@@ -14,7 +14,7 @@ from streamlit_prophet.lib.dataprep.format import (
     resample_df,
 )
 from streamlit_prophet.lib.dataprep.split import get_train_set, get_train_val_sets
-from streamlit_prophet.lib.exposition.export import display_links, display_save_experiment_button
+from streamlit_prophet.lib.exposition.export import display_save_experiment_button
 from streamlit_prophet.lib.exposition.visualize import (
     plot_components,
     plot_future,
