@@ -555,12 +555,11 @@ def prepare_future_df(
         datasets["full"] = future.loc[future["ds"] < dates["forecast_start_date"]]
         future = future.drop("y", axis=1)
     else:
-        # Generate future dates starting *after* the last known date
         future_dates = pd.date_range(
-            start=datasets["full"].ds.max(),
-            periods=dates["forecast_horizon"] + 1, # +1 because start is inclusive of the last point
+            start=datasets["full"].ds.min(),
+            end=dates["forecast_end_date"],
             freq=dates["forecast_freq"],
-        )[1:] # Exclude the first date which is the last point of the training data
+        )
         future = pd.DataFrame(future_dates, columns=["ds"])
     future = add_cap_and_floor_cols(future, params)
     return future, datasets
