@@ -18,6 +18,7 @@ from streamlit_prophet.lib.utils.mapping import (
     convert_into_nb_of_seconds,
     mapping_freq_names,
 )
+from pandas.tseries.offsets import DateOffset, MonthBegin, MonthEnd
 
 
 def input_train_dates(
@@ -169,29 +170,41 @@ def input_forecast_dates(
     dict
         Dictionary containing future forecast dates information.
     """
-    forecast_freq_name = mapping_freq_names(resampling["freq"][-1])
+    freq_unit = resampling["freq"][-1]
+    forecast_freq_name = mapping_freq_names(freq_unit)
     dates["forecast_horizon"] = st.number_input(
         f"Forecast horizon in {forecast_freq_name}",
         min_value=1,
-        value=config["horizon"][resampling["freq"][-1]],
+        value=config["horizon"][freq_unit],
         help=readme["tooltips"]["forecast_horizon"],
     )
+
+    last_history_date = df.ds.max()
+
     if forecast_freq_name in ["seconds", "hours"]:
-        dates["forecast_start_date"] = df.ds.max() + timedelta(seconds=1)
+        dates["forecast_start_date"] = last_history_date + timedelta(seconds=1)
         timedelta_horizon = convert_into_nb_of_seconds(
-            resampling["freq"][-1], dates["forecast_horizon"]
+            freq_unit, dates["forecast_horizon"]
         )
         dates["forecast_end_date"] = dates["forecast_start_date"] + timedelta(
             seconds=timedelta_horizon
         )
+    elif freq_unit == 'M' or freq_unit == 'MS':
+        dates["forecast_start_date"] = last_history_date + MonthBegin(1)
+        dates["forecast_end_date"] = dates["forecast_start_date"] + DateOffset(months=dates["forecast_horizon"]) - MonthBegin(1) + MonthEnd(0)
+        if dates["forecast_end_date"] < dates["forecast_start_date"]:
+            dates["forecast_end_date"] = dates["forecast_start_date"] + MonthEnd(0)
     else:
-        dates["forecast_start_date"] = df.ds.max() + timedelta(days=1)
+        dates["forecast_start_date"] = last_history_date + timedelta(days=1)
         timedelta_horizon = convert_into_nb_of_days(
-            resampling["freq"][-1], dates["forecast_horizon"]
+            freq_unit, dates["forecast_horizon"]
         )
+        if timedelta_horizon > 0:
+            timedelta_horizon -= 1
         dates["forecast_end_date"] = dates["forecast_start_date"] + timedelta(
             days=timedelta_horizon
         )
+
     dates["forecast_freq"] = str(resampling["freq"])
     print_forecast_dates(dates, resampling)
     return dates
