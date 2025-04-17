@@ -224,6 +224,7 @@ def plot_future(
     cleaning: Dict[Any, Any],
     readme: Dict[Any, Any],
     report: List[Dict[str, Any]],
+    df: pd.DataFrame = None,
 ) -> List[Dict[str, Any]]:
     """Plots a graph with predictions for future dates, with explanations.
 
@@ -243,6 +244,8 @@ def plot_future(
         Dictionary containing explanations about the graph.
     report: List[Dict[str, Any]]
         List of all report components.
+    df : pd.DataFrame, optional
+        Historical dataframe containing the target variable, by default None.
     """
     display_expander(readme, "future", "More info on this plot")
     bool_param = False if cleaning["log_transform"] else True
@@ -256,8 +259,82 @@ def plot_future(
     )
     fig.update_layout(xaxis_range=[dates["forecast_start_date"], dates["forecast_end_date"]])
     st.plotly_chart(fig)
+    
+    # Calculate and display forecast summary metrics
+    future_df = forecasts["future"]
+    
+    # Filter to just the forecasted period (excluding historical data in the forecast dataframe)
+    forecast_period = future_df[future_df['ds'] >= dates["forecast_start_date"]]
+    
+    # 1. Total forecasted value
+    total_forecast = forecast_period['yhat'].sum()
+    
+    # 2. Comparison with previous period (if historical data is available)
+    prev_period_diff = None
+    prev_year_diff = None
+    
+    if df is not None:
+        # Calculate duration of forecast period in days
+        forecast_duration = (dates["forecast_end_date"] - dates["forecast_start_date"]).days
+        
+        # Previous period (same duration before forecast start)
+        prev_period_start = dates["forecast_start_date"] - pd.Timedelta(days=forecast_duration)
+        prev_period_end = dates["forecast_start_date"] - pd.Timedelta(days=1)
+        
+        prev_period_data = df[(df['ds'] >= prev_period_start) & (df['ds'] <= prev_period_end)]
+        if not prev_period_data.empty:
+            prev_period_total = prev_period_data['y'].sum()
+            prev_period_diff = total_forecast - prev_period_total
+            prev_period_pct = (prev_period_diff / prev_period_total) * 100 if prev_period_total != 0 else float('inf')
+        
+        # 3. Comparison with previous year (same period one year ago)
+        prev_year_start = dates["forecast_start_date"] - pd.Timedelta(days=365)
+        prev_year_end = dates["forecast_end_date"] - pd.Timedelta(days=365)
+        
+        prev_year_data = df[(df['ds'] >= prev_year_start) & (df['ds'] <= prev_year_end)]
+        if not prev_year_data.empty:
+            prev_year_total = prev_year_data['y'].sum()
+            prev_year_diff = total_forecast - prev_year_total
+            prev_year_pct = (prev_year_diff / prev_year_total) * 100 if prev_year_total != 0 else float('inf')
+    
+    # Display the metrics
+    st.write("## Forecast Summary Metrics")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            label=f"Total Forecasted {target_col}",
+            value=f"{total_forecast:.2f}"
+        )
+    
+    if prev_period_diff is not None:
+        with col2:
+            st.metric(
+                label=f"vs Previous Period",
+                value=f"{prev_period_diff:.2f}",
+                delta=f"{prev_period_pct:.1f}%"
+            )
+    
+    if prev_year_diff is not None:
+        with col3:
+            st.metric(
+                label=f"vs Previous Year",
+                value=f"{prev_year_diff:.2f}",
+                delta=f"{prev_year_pct:.1f}%"
+            )
+    
     report.append({"object": fig, "name": "future_forecast", "type": "plot"})
     report.append({"object": forecasts["future"], "name": "future_forecast", "type": "dataset"})
+    
+    # Add the summary metrics to the report
+    summary_metrics = {
+        "total_forecast": total_forecast,
+        "prev_period_diff": prev_period_diff,
+        "prev_year_diff": prev_year_diff
+    }
+    report.append({"object": summary_metrics, "name": "forecast_summary_metrics", "type": "metrics"})
+    
     return report
 
 

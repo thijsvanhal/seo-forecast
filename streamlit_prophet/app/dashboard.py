@@ -234,7 +234,7 @@ if st.checkbox(
 
     if make_future_forecast:
         st.write("# 4. Future forecast" if evaluate else "# 3. Future forecast")
-        report = plot_future(models, forecasts, dates, target_col, cleaning, readme, report)
+        report = plot_future(models, forecasts, dates, target_col, cleaning, readme, report, df)
 
     # Save experiment
     if track_experiments:
