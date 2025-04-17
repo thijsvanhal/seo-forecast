@@ -291,7 +291,7 @@ def plot_future(
         prev_year_start = dates["forecast_start_date"] - pd.Timedelta(days=365)
         prev_year_end = dates["forecast_end_date"] - pd.Timedelta(days=365)
         
-        if prev_year_start == prev_period_start and prev_year_end == prev_period_end:
+        if prev_year_start == prev_period_start:
             prev_year_diff = None
             prev_year_pct = None
         else:
