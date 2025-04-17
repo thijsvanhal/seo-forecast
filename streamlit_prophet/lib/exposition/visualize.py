@@ -291,11 +291,15 @@ def plot_future(
         prev_year_start = dates["forecast_start_date"] - pd.Timedelta(days=365)
         prev_year_end = dates["forecast_end_date"] - pd.Timedelta(days=365)
         
-        prev_year_data = df[(df['ds'] >= prev_year_start) & (df['ds'] <= prev_year_end)]
-        if not prev_year_data.empty:
-            prev_year_total = prev_year_data['y'].sum()
-            prev_year_diff = total_forecast - prev_year_total
-            prev_year_pct = (prev_year_diff / prev_year_total) * 100 if prev_year_total != 0 else float('inf')
+        if prev_year_start == prev_period_start and prev_year_end == prev_period_end:
+            prev_year_diff = None
+            prev_year_pct = None
+        else:
+            prev_year_data = df[(df['ds'] >= prev_year_start) & (df['ds'] <= prev_year_end)]
+            if not prev_year_data.empty:
+                prev_year_total = prev_year_data['y'].sum()
+                prev_year_diff = total_forecast - prev_year_total
+                prev_year_pct = (prev_year_diff / prev_year_total) * 100 if prev_year_total != 0 else float('inf')
     
     # Display the metrics
     st.write("## Forecast Summary Metrics")
