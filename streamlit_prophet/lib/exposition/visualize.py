@@ -128,14 +128,14 @@ def plot_performance(
     st.write("## Error analysis")
     display_expander(readme, "helper_errors", "How to troubleshoot forecasting errors?", True)
     fig1 = plot_forecasts_vs_truth(evaluation_df, target_col, use_cv, style)
-    fig2 = plot_truth_vs_actual_scatter(evaluation_df, use_cv, style)
-    fig3 = plot_residuals_distrib(evaluation_df, use_cv, style)
+    # fig2 = plot_truth_vs_actual_scatter(evaluation_df, use_cv, style)
+    # fig3 = plot_residuals_distrib(evaluation_df, use_cv, style)
     st.plotly_chart(fig1)
-    st.plotly_chart(fig2)
-    st.plotly_chart(fig3)
+    # st.plotly_chart(fig2)
+    # st.plotly_chart(fig3)
     report.append({"object": fig1, "name": "eval_forecast_vs_truth_line", "type": "plot"})
-    report.append({"object": fig2, "name": "eval_forecast_vs_truth_scatter", "type": "plot"})
-    report.append({"object": fig3, "name": "eval_residuals_distribution", "type": "plot"})
+    # report.append({"object": fig2, "name": "eval_forecast_vs_truth_scatter", "type": "plot"})
+    # report.append({"object": fig3, "name": "eval_residuals_distribution", "type": "plot"})
     report.append({"object": evaluation_df, "name": "eval_data", "type": "dataset"})
     report.append(
         {"object": metrics_df.reset_index(), "name": "eval_detailed_performance", "type": "dataset"}
@@ -201,16 +201,16 @@ def plot_components(
     )
     st.plotly_chart(fig1)
 
-    st.write("## Local impact")
-    display_expander(readme, "waterfall", "More info on this plot", True)
-    start_date, end_date = input_waterfall_dates(forecast_df, resampling)
-    fig2 = make_waterfall_components_plot(
-        model, forecast_df, start_date, end_date, target_col, cleaning, resampling, style, df
-    )
-    st.plotly_chart(fig2)
+    # st.write("## Local impact")
+    # display_expander(readme, "waterfall", "More info on this plot", True)
+    # start_date, end_date = input_waterfall_dates(forecast_df, resampling)
+    # fig2 = make_waterfall_components_plot(
+    #     model, forecast_df, start_date, end_date, target_col, cleaning, resampling, style, df
+    # )
+    # st.plotly_chart(fig2)
 
     report.append({"object": fig1, "name": "global_components", "type": "plot"})
-    report.append({"object": fig2, "name": "local_components", "type": "plot"})
+    # report.append({"object": fig2, "name": "local_components", "type": "plot"})
     report.append({"object": df, "name": "model_input_data", "type": "dataset"})
 
     return report

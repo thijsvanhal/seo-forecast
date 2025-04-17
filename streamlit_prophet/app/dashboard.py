@@ -177,9 +177,7 @@ if st.checkbox(
     if not (evaluate | make_future_forecast):
         st.error("Please check at least 'Evaluation' or 'Forecast' in the sidebar.")
 
-    track_experiments = st.checkbox(
-        "Track experiments", value=False, help=readme["tooltips"]["track_experiments"]
-    )
+    track_experiments = True
 
     datasets, models, forecasts = forecast_workflow(
         config,

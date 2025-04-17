@@ -234,22 +234,10 @@ def input_holidays_params(
             help=readme["tooltips"]["school_holidays"],
         )
 
-    lockdowns = []
-    if country in COVID_LOCKDOWN_DATES_MAPPING.keys():
-        lockdown_options = list(range(len(COVID_LOCKDOWN_DATES_MAPPING[country])))
-        lockdowns = st.multiselect(
-            label="Lockdown events",
-            options=lockdown_options,
-            default=config["model"]["lockdown_events"],
-            format_func=lockdown_format_func,
-            help=readme["tooltips"]["lockdown_events"],
-        )
-
     params["holidays"] = {
         "country": country,
         "public_holidays": public_holidays,
         "school_holidays": school_holidays,
-        "lockdown_events": lockdowns,
     }
     return params
 
