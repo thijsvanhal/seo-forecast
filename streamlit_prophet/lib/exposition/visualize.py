@@ -313,16 +313,16 @@ def plot_future(
             st.markdown("### Previous Period Comparison")
             st.markdown(f"**Previous Period:** {prev_period_start.strftime('%Y-%m-%d')} to {prev_period_end.strftime('%Y-%m-%d')}")
             if not prev_period_data.empty:
-                st.markdown(f"**Previous Period Total:** {prev_period_total:.2f}")
-                st.markdown(f"**Difference:** {prev_period_diff:.2f} ({prev_period_pct:.1f}%)")
+                st.markdown(f"**Previous Period Total:** {int(round(prev_period_total))}")
+                st.markdown(f"**Difference:** {int(round(prev_period_diff)):.2f} ({prev_period_pct:.1f}%)")
             else:
                 st.markdown("*No data available for previous period*")
                 
             st.markdown("### Previous Year Comparison")
             st.markdown(f"**Same Period Last Year:** {prev_year_start.strftime('%Y-%m-%d')} to {prev_year_end.strftime('%Y-%m-%d')}")
             if not prev_year_data.empty:
-                st.markdown(f"**Previous Year Total:** {prev_year_total:.2f}")
-                st.markdown(f"**Difference:** {prev_year_diff:.2f} ({prev_year_pct:.1f}%)")
+                st.markdown(f"**Previous Year Total:** {int(round(prev_year_total))}")
+                st.markdown(f"**Difference:** {int(round(prev_year_diff)):.2f} ({prev_year_pct:.1f}%)")
             else:
                 st.markdown("*No data available for same period last year*")
     
@@ -331,14 +331,14 @@ def plot_future(
     with col1:
         st.metric(
             label=f"Total Forecasted {target_col}",
-            value=f"{total_forecast:.2f}"
+            value=f"{int(round(total_forecast))}"
         )
     
     if prev_period_diff is not None:
         with col2:
             st.metric(
                 label=f"vs Previous Period",
-                value=f"{prev_period_diff:.2f}",
+                value=f"{int(round(prev_period_diff))}",
                 delta=f"{prev_period_pct:.1f}%"
             )
     
@@ -346,7 +346,7 @@ def plot_future(
         with col3:
             st.metric(
                 label=f"vs Previous Year",
-                value=f"{prev_year_diff:.2f}",
+                value=f"{int(round(prev_year_diff))}",
                 delta=f"{prev_year_pct:.1f}%"
             )
     
