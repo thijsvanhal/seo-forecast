@@ -300,6 +300,28 @@ def plot_future(
     # Display the metrics
     st.write("## Forecast Summary Metrics")
     
+    # Add expander with detailed information about the date ranges
+    with st.expander("More info on comparison calculations", expanded=False):
+        st.markdown("### Date Ranges Used for Calculations")
+        st.markdown(f"**Forecast Period:** {dates['forecast_start_date'].strftime('%Y-%m-%d')} to {dates['forecast_end_date'].strftime('%Y-%m-%d')} ({forecast_duration+1} days)")
+        
+        if df is not None:
+            st.markdown("### Previous Period Comparison")
+            st.markdown(f"**Previous Period:** {prev_period_start.strftime('%Y-%m-%d')} to {prev_period_end.strftime('%Y-%m-%d')}")
+            if not prev_period_data.empty:
+                st.markdown(f"**Previous Period Total:** {prev_period_total:.2f}")
+                st.markdown(f"**Difference:** {prev_period_diff:.2f} ({prev_period_pct:.1f}%)")
+            else:
+                st.markdown("*No data available for previous period*")
+                
+            st.markdown("### Previous Year Comparison")
+            st.markdown(f"**Same Period Last Year:** {prev_year_start.strftime('%Y-%m-%d')} to {prev_year_end.strftime('%Y-%m-%d')}")
+            if not prev_year_data.empty:
+                st.markdown(f"**Previous Year Total:** {prev_year_total:.2f}")
+                st.markdown(f"**Difference:** {prev_year_diff:.2f} ({prev_year_pct:.1f}%)")
+            else:
+                st.markdown("*No data available for same period last year*")
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
