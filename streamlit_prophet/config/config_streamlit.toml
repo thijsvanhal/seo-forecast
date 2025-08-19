@@ -70,7 +70,7 @@ CV = 5 # Default number of cross-validation folds if cross-validation is selecte
 gap_train_valid = 1 # Default number of days between training set and validation set
 
 [validity]
-min_data_points_train = 30 # Minimum number of datapoints (-1) to have in training set to train a model
+min_data_points_train = 25 # Minimum number of datapoints (-1) to have in training set to train a model
 min_data_points_val = 1 # Minimum number of datapoints (-1) to have in validation set to evaluate model
 min_target_cardinality = 5 # Minimum number of distinct values that the target should have
 max_cat_reg_cardinality = 5 # Maximum number of distinct values that a categorical regressor should have
