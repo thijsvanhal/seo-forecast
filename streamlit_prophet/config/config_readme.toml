@@ -215,68 +215,6 @@ choice_agg_perf = """
 Check to sum all predictions and true values at the selected granularity before computing performance metrics.
 Be careful, this method can be misleading as under-prediction errors could be compensated by over-prediction errors.
 """
-scenario_mode = """
-Choose between two scenario modes:
-* __Numeric__: Define specific SEO interventions (budget, content, backlinks) with customizable impact coefficients.
-* __Simple Percentage__: Define a target traffic increase percentage with delay and ramp-up period.
-"""
-num_scenarios = """
-Number of scenarios to create and compare against the baseline forecast.
-Each scenario will be displayed as a separate line on the forecast chart.
-"""
-scenario_name = """
-Give your scenario a descriptive name to easily identify it in the comparison chart.
-"""
-scenario_budget = """
-Monthly budget increase in dollars for SEO activities (e.g., paid ads, tools, agencies).
-This will be converted to traffic impact using the coefficient below.
-"""
-scenario_content = """
-Number of additional content pieces (articles, blog posts, pages) to create per month.
-This will be converted to traffic impact using the coefficient below.
-"""
-scenario_backlinks = """
-Number of additional quality backlinks to acquire per month.
-This will be converted to traffic impact using the coefficient below.
-"""
-budget_coefficient = """
-Expected traffic increase per $1000 of monthly budget.
-For example, if 50, then $5000/month budget would contribute 250 visitors/day at peak.
-Adjust based on your historical data and industry benchmarks.
-"""
-content_coefficient = """
-Expected traffic increase per content piece.
-For example, if 100, then 10 articles/month would contribute 1000 visitors/day at peak.
-Adjust based on your average article performance.
-"""
-backlink_coefficient = """
-Expected traffic increase per backlink.
-For example, if 10, then 20 backlinks/month would contribute 200 visitors/day at peak.
-Adjust based on the quality and relevance of backlinks.
-"""
-scenario_delay = """
-Number of months before SEO efforts start showing any effect.
-Typical SEO delays range from 2-4 months due to indexing and ranking time.
-"""
-scenario_acceleration = """
-Number of months for the effect to grow from 0 to maximum impact (S-curve growth).
-This represents how long it takes for SEO changes to reach full potential.
-Typical acceleration periods range from 4-8 months.
-"""
-scenario_plateau = """
-Monthly growth rate after reaching maximum impact (as percentage).
-This represents continued but slower growth in the plateau phase.
-For example, 1% means traffic continues growing at 1% per month after the acceleration phase.
-"""
-scenario_percentage = """
-Target traffic increase as a percentage of baseline forecast.
-For example, 25% means the scenario aims to increase traffic by 25% over the baseline.
-This is a simple way to model overall SEO improvements without specifying individual tactics.
-"""
-scenario_duration = """
-Number of months to reach the target percentage increase (ramp-up period).
-This represents how long it takes to achieve the full traffic increase through the S-curve growth pattern.
-"""
 
 [plots]
 overview = """

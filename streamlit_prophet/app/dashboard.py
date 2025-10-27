@@ -20,7 +20,6 @@ from streamlit_prophet.lib.exposition.visualize import (
     plot_future,
     plot_overview,
     plot_performance,
-    plot_scenarios,
 )
 from streamlit_prophet.lib.inputs.dataprep import input_cleaning, input_dimensions, input_resampling
 from streamlit_prophet.lib.inputs.dataset import (
@@ -42,9 +41,7 @@ from streamlit_prophet.lib.inputs.params import (
     input_regressors,
     input_seasonality_params,
 )
-from streamlit_prophet.lib.inputs.scenarios import input_scenarios
 from streamlit_prophet.lib.models.prophet import forecast_workflow
-from streamlit_prophet.lib.models.scenarios import generate_scenario_forecasts
 from streamlit_prophet.lib.utils.load import load_config
 
 # Page config
@@ -170,22 +167,6 @@ if make_future_forecast:
             datasets, dates, params, dimensions, load_options, date_col
         )
 
-st.sidebar.title("5. Scenarios")
-
-# Choose whether or not to add scenario analysis
-add_scenarios = st.sidebar.checkbox(
-    "Add scenario analysis",
-    value=False,
-    help="Enable SEO scenario forecasting to compare different strategies (budget, content, backlinks)",
-)
-scenarios = []
-if add_scenarios:
-    if not make_future_forecast:
-        st.sidebar.warning("⚠️ Scenario analysis requires 'Make forecast on future dates' to be enabled.")
-    else:
-        with st.sidebar.expander("Scenario Configuration", expanded=True):
-            scenarios = input_scenarios(config, readme)
-
 # Launch training & forecast
 if st.checkbox(
     "Launch forecast",
@@ -254,31 +235,6 @@ if st.checkbox(
     if make_future_forecast:
         st.write("# 4. Future forecast" if evaluate else "# 3. Future forecast")
         report = plot_future(models, forecasts, dates, target_col, cleaning, readme, report, df)
-
-    # Scenario analysis
-    if make_future_forecast and add_scenarios and len(scenarios) > 0:
-        section_number = 5 if evaluate else 4
-        st.write(f"# {section_number}. Scenario Analysis")
-        
-        # Generate scenario forecasts
-        scenario_forecasts = generate_scenario_forecasts(
-            baseline_forecast=forecasts["future"],
-            scenarios=scenarios,
-            forecast_start_date=dates["forecast_start_date"],
-        )
-        
-        # Plot scenarios
-        report = plot_scenarios(
-            baseline_forecast=forecasts["future"],
-            scenario_forecasts=scenario_forecasts,
-            scenarios=scenarios,
-            target_col=target_col,
-            dates=dates,
-            config=config,
-            readme=readme,
-            report=report,
-            df=df,
-        )
 
     # Save experiment
     if track_experiments:

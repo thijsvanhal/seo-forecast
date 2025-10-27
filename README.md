@@ -94,21 +94,8 @@ Look at the tooltips to understand how each parameter is impacting forecasts.
 assess your model performance.
 * <strong>Make a forecast</strong>: Make a forecast on future dates that are not included in your dataset,
 with the model previously trained.
-* <strong>Add scenario analysis</strong> (NEW): Model the impact of SEO strategies (budget, content, backlinks) 
-with delayed effects and realistic growth curves. Compare multiple scenarios against your baseline forecast.
 
 Once you are satisfied, click on "save experiment" to download all plots and data locally.
-
-## 🎯 SEO Scenario Forecasting
-
-This app now includes **SEO scenario forecasting** to help you predict the impact of different strategies:
-
-* **Numeric Mode**: Define specific interventions (budget, content, backlinks) with customizable impact coefficients
-* **Simple Percentage Mode**: Set a target traffic increase with delay and ramp-up period
-* **Realistic Growth Modeling**: Three-phase effect curve (delay → S-curve acceleration → plateau)
-* **Multi-Scenario Comparison**: Compare up to 10 scenarios side-by-side with visual overlays
-
-See [SCENARIOS.md](SCENARIOS.md) for detailed documentation on using this feature.
 
 
 ## 🛠️ How to contribute ?
