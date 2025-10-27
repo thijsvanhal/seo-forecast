@@ -181,16 +181,6 @@ You don't necessarily have to select regressors. Only select those that improve 
 regressor_prior_scale = """
 Determines the magnitude of the regressor effect on your predictions.
 """
-enable_lags = """
-Enable lag effects to model delayed impact of regressors. 
-This is particularly important for SEO and marketing investments where the impact typically takes 3-6 months to fully materialize.
-Lagged features allow the model to learn that investment in month X affects results in month X+3, X+6, etc.
-"""
-enable_scenarios = """
-Enable scenario modeling to compare different investment strategies side-by-side.
-This allows you to forecast outcomes under different investment levels and demonstrate potential ROI to stakeholders.
-Create multiple scenarios (e.g., 'Baseline', 'Moderate Investment', 'Aggressive SEO') to compare their projected outcomes.
-"""
 growth = """
 This parameter determines how the trend will evolve between change points:
 * `linear`: The trend will be a line with a slope that can vary at each changepoint.
