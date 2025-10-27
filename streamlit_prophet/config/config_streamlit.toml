@@ -93,3 +93,16 @@ waterfall_digits = 2 # Number of digits in waterfall chart
 
 [global]
 seed = 42 # Random seed for modelling
+
+[scenarios] # SEO Scenario forecasting parameters
+max_scenarios = 10 # Maximum number of scenarios that can be created
+default_budget = 5000.0 # Default monthly budget increase ($)
+default_content = 10.0 # Default content pieces per month
+default_backlinks = 20.0 # Default backlinks per month
+budget_coefficient = 50.0 # Default traffic increase per $1000 budget
+content_coefficient = 100.0 # Default traffic increase per content piece
+backlink_coefficient = 10.0 # Default traffic increase per backlink
+default_delay = 2.0 # Default delay in months before effects begin
+default_acceleration = 6.0 # Default acceleration period in months
+default_plateau_rate = 0.01 # Default plateau growth rate (1% per month)
+default_pct_increase = 25.0 # Default percentage increase for simple scenarios
