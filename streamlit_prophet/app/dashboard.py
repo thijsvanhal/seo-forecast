@@ -21,6 +21,10 @@ from streamlit_prophet.lib.exposition.visualize import (
     plot_overview,
     plot_performance,
 )
+from streamlit_prophet.lib.exposition.scenarios import (
+    compare_scenario_forecasts,
+    display_scenario_summary,
+)
 from streamlit_prophet.lib.inputs.dataprep import input_cleaning, input_dimensions, input_resampling
 from streamlit_prophet.lib.inputs.dataset import (
     input_columns,
@@ -40,6 +44,13 @@ from streamlit_prophet.lib.inputs.params import (
     input_prior_scale_params,
     input_regressors,
     input_seasonality_params,
+)
+from streamlit_prophet.lib.inputs.scenarios import input_investment_scenarios
+from streamlit_prophet.lib.dataprep.lag import (
+    add_lagged_regressors,
+    input_lag_configuration,
+    apply_lags_to_scenario,
+    fill_lagged_regressor_nulls,
 )
 from streamlit_prophet.lib.models.prophet import forecast_workflow
 from streamlit_prophet.lib.utils.load import load_config
@@ -115,6 +126,28 @@ with st.sidebar.expander("Holidays"):
 with st.sidebar.expander("Regressors"):
     params = input_regressors(df, config, params, readme)
 
+# Lag effects for regressors
+lag_config: Dict[Any, Any] = dict()
+if len(params.get("regressors", {})) > 0:
+    with st.sidebar.expander("Lag Effects", expanded=False):
+        lag_config = input_lag_configuration(params, resampling, readme)
+        if lag_config:
+            # Apply lags to dataframe
+            regressors_list = list(params["regressors"].keys())
+            df = add_lagged_regressors(df, regressors_list, lag_config)
+            df = fill_lagged_regressor_nulls(df, lag_config, method="zero")
+            
+            # Update params to include lagged regressors
+            for regressor in lag_config:
+                for lag in lag_config[regressor]:
+                    lag_col_name = f"{regressor}_lag_{lag}"
+                    if lag_col_name not in params["regressors"]:
+                        params["regressors"][lag_col_name] = {
+                            "prior_scale": params["regressors"][regressor]["prior_scale"]
+                        }
+            
+            st.success(f"✓ Applied {sum(len(lags) for lags in lag_config.values())} lagged features")
+
 # Other parameters
 with st.sidebar.expander("Other parameters", expanded=False):
     params = input_other_params(config, params, readme)
@@ -159,6 +192,7 @@ st.sidebar.title("4. Forecast")
 make_future_forecast = st.sidebar.checkbox(
     "Make forecast on future dates", value=False, help=readme["tooltips"]["choice_forecast"]
 )
+scenarios: Dict[str, Any] = dict()
 if make_future_forecast:
     with st.sidebar.expander("Horizon", expanded=False):
         dates = input_forecast_dates(df, dates, resampling, config, readme)
@@ -166,6 +200,10 @@ if make_future_forecast:
         datasets = input_future_regressors(
             datasets, dates, params, dimensions, load_options, date_col
         )
+    with st.sidebar.expander("Scenarios", expanded=False):
+        scenarios = input_investment_scenarios(params, dates, resampling, readme)
+        if scenarios:
+            display_scenario_summary(scenarios)
 
 # Launch training & forecast
 if st.checkbox(
@@ -235,6 +273,23 @@ if st.checkbox(
     if make_future_forecast:
         st.write("# 4. Future forecast" if evaluate else "# 3. Future forecast")
         report = plot_future(models, forecasts, dates, target_col, cleaning, readme, report, df)
+        
+        # Scenario comparison
+        if scenarios:
+            # Apply lags to scenarios if configured
+            if lag_config:
+                scenarios_with_lags = {}
+                for scenario_name, scenario_df in scenarios.items():
+                    scenario_with_lags = apply_lags_to_scenario(
+                        scenario_df, df, lag_config, list(params["regressors"].keys())
+                    )
+                    scenario_with_lags = fill_lagged_regressor_nulls(
+                        scenario_with_lags, lag_config, method="zero"
+                    )
+                    scenarios_with_lags[scenario_name] = scenario_with_lags
+                scenarios = scenarios_with_lags
+            
+            compare_scenario_forecasts(models, scenarios, target_col, cleaning, df)
 
     # Save experiment
     if track_experiments:

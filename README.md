@@ -94,8 +94,27 @@ Look at the tooltips to understand how each parameter is impacting forecasts.
 assess your model performance.
 * <strong>Make a forecast</strong>: Make a forecast on future dates that are not included in your dataset,
 with the model previously trained.
+* <strong>📊 NEW: Investment Scenario Simulation</strong>: Compare different investment strategies (e.g., SEO budgets, content production) and their projected impact on your metrics. Perfect for sales presentations and ROI demonstrations!
 
 Once you are satisfied, click on "save experiment" to download all plots and data locally.
+
+## 🎯 NEW: Investment Scenario Simulation
+
+This tool now includes powerful scenario simulation capabilities, perfect for SEO and marketing forecasting:
+
+- **🔮 What-If Analysis**: Compare different investment levels side-by-side
+- **⏱️ Lag Effects**: Model delayed impact (e.g., SEO investments taking 3-6 months to show results)
+- **💰 ROI Analysis**: Calculate and visualize return on investment for different strategies
+- **📈 Sales Presentations**: Demonstrate potential outcomes to clients and stakeholders
+
+**Use Cases:**
+- Pitch SEO services by showing projected impact of different investment levels
+- Plan budgets by comparing ROI across scenarios
+- Justify marketing spend with data-driven projections
+
+👉 **See [SCENARIO_SIMULATION.md](SCENARIO_SIMULATION.md) for detailed usage guide and examples**
+
+👉 **Try it with the example dataset: [example_seo_data.csv](example_seo_data.csv)**
 
 
 ## 🛠️ How to contribute ?
