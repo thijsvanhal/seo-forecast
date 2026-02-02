@@ -46,8 +46,11 @@ pyarrow = "^18.0.0"
 matplotlib = "^3.10.0"
 pillow = "^11.0.0"
 pyyaml = "^6.0.2"
-vacances-scolaires-france = "^0.8.0"
 watchdog = "^6.0.0"
+vacances-scolaires-france = "^0.8.0"
+
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 darglint = "^1.8.0"
