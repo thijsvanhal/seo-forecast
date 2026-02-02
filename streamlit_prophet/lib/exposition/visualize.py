@@ -271,12 +271,18 @@ def plot_future(
     
     # 2. Comparison with previous period (if historical data is available)
     prev_period_diff = None
+    prev_period_pct = None
+    prev_period_data = pd.DataFrame()
+    prev_period_total = None
     prev_year_diff = None
+    prev_year_pct = None
+    prev_year_data = pd.DataFrame()
+    prev_year_total = None
+
+    # Calculate duration of forecast period in days (used for comparisons and display)
+    forecast_duration = (dates["forecast_end_date"] - dates["forecast_start_date"]).days
     
     if df is not None:
-        # Calculate duration of forecast period in days
-        forecast_duration = (dates["forecast_end_date"] - dates["forecast_start_date"]).days
-        
         # Previous period (same duration before forecast start)
         prev_period_start = dates["forecast_start_date"] - pd.Timedelta(days=forecast_duration)
         prev_period_end = dates["forecast_start_date"] - pd.Timedelta(days=1)
