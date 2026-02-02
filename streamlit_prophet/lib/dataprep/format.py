@@ -4,6 +4,81 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+def _is_month_end(ts: pd.Timestamp) -> bool:
+    return ts.day == ts.days_in_month
+
+
+def _is_quarter_end(ts: pd.Timestamp) -> bool:
+    return (ts.month in {3, 6, 9, 12}) and _is_month_end(ts)
+
+
+def _is_year_end(ts: pd.Timestamp) -> bool:
+    return (ts.month == 12) and _is_month_end(ts)
+
+
+def _infer_period_anchor_from_history(history_ds: pd.Series, unit: str) -> str:
+    """
+    Infer whether the time series is aligned on the *start* or *end* of the period.
+
+    Returns "start", "end", or "unknown".
+    """
+    if history_ds.empty:
+        return "unknown"
+    ds = pd.to_datetime(history_ds).dropna()
+    if ds.empty:
+        return "unknown"
+
+    # Use a small sample for speed, but keep deterministic ordering.
+    sample = ds.sort_values().iloc[-min(len(ds), 48) :]
+
+    if unit == "M":
+        if (sample.dt.day == 1).all():
+            return "start"
+        if sample.map(_is_month_end).all():
+            return "end"
+        return "unknown"
+
+    if unit == "Q":
+        if ((sample.dt.day == 1) & (sample.dt.month.isin([1, 4, 7, 10]))).all():
+            return "start"
+        if sample.map(_is_quarter_end).all():
+            return "end"
+        return "unknown"
+
+    if unit == "Y":
+        if ((sample.dt.day == 1) & (sample.dt.month == 1)).all():
+            return "start"
+        if sample.map(_is_year_end).all():
+            return "end"
+        return "unknown"
+
+    return "unknown"
+
+
+def _align_period_freq_to_history(freq: str, history_ds: pd.Series) -> str:
+    """
+    Align 'M'/'Q'/'Y' frequencies to history by choosing start ('MS'/'QS'/'YS')
+    or end ('M'/'Q'/'Y') anchoring.
+
+    This prevents plotting/merge misalignment when history is month-end but future
+    dates are generated at month-start (or vice versa).
+    """
+    if not isinstance(freq, str) or len(freq) == 0:
+        return freq
+
+    unit = freq[-1]
+    if unit not in {"M", "Q", "Y"}:
+        return freq
+
+    multiplier = freq[:-1]  # may be "" or digits
+    anchor = _infer_period_anchor_from_history(history_ds, unit)
+    if anchor == "start":
+        suffix = f"{unit}S"  # MS / QS / YS (pandas aliases)
+        return f"{multiplier}{suffix}"
+    if anchor == "end":
+        return freq
+    return freq
+
 
 @st.cache(ttl=300)
 def remove_empty_cols(df: pd.DataFrame) -> Tuple[pd.DataFrame, List[Any]]:
@@ -555,10 +630,7 @@ def prepare_future_df(
         datasets["full"] = future.loc[future["ds"] < dates["forecast_start_date"]]
         future = future.drop("y", axis=1)
     else:
-        freq = dates["forecast_freq"]
-        if freq.upper() == 'M':
-             freq = 'MS'
-
+        freq = _align_period_freq_to_history(dates["forecast_freq"], datasets["full"]["ds"])
         future_dates = pd.date_range(
             start=datasets["full"].ds.min(),
             end=dates["forecast_end_date"],

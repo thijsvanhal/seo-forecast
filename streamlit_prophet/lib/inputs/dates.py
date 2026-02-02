@@ -18,6 +18,7 @@ from streamlit_prophet.lib.utils.mapping import (
     convert_into_nb_of_seconds,
     mapping_freq_names,
 )
+from streamlit_prophet.lib.dataprep.format import _align_period_freq_to_history
 
 
 def input_train_dates(
@@ -185,14 +186,25 @@ def input_forecast_dates(
             seconds=timedelta_horizon
         )
     else:
-        dates["forecast_start_date"] = df.ds.max() + timedelta(days=1)
-        timedelta_horizon = convert_into_nb_of_days(
-            resampling["freq"][-1], dates["forecast_horizon"]
-        )
-        dates["forecast_end_date"] = dates["forecast_start_date"] + timedelta(
-            days=timedelta_horizon
-        )
-    dates["forecast_freq"] = str(resampling["freq"])
+        # Use true calendar offsets for M/Q/Y so "monthly" doesn't mean "30 days".
+        # Also align start/end anchoring (e.g. month-end vs month-start) to the dataset.
+        freq = _align_period_freq_to_history(str(resampling["freq"]), df["ds"])
+        try:
+            offset = pd.tseries.frequencies.to_offset(freq)
+            dates["forecast_start_date"] = pd.to_datetime(df.ds.max()) + offset
+            dates["forecast_end_date"] = dates["forecast_start_date"] + offset * dates["forecast_horizon"]
+        except Exception:
+            # Fallback to previous behavior for unusual/custom freqs.
+            dates["forecast_start_date"] = df.ds.max() + timedelta(days=1)
+            timedelta_horizon = convert_into_nb_of_days(
+                resampling["freq"][-1], dates["forecast_horizon"]
+            )
+            dates["forecast_end_date"] = dates["forecast_start_date"] + timedelta(
+                days=timedelta_horizon
+            )
+        dates["forecast_freq"] = freq
+    if "forecast_freq" not in dates:
+        dates["forecast_freq"] = str(resampling["freq"])
     print_forecast_dates(dates, resampling)
     return dates
 
