@@ -1,5 +1,16 @@
 from typing import Any, Dict, List
 
+# Streamlit Community Cloud runs the script from its folder. When the entrypoint
+# is inside a package subdirectory (e.g. `streamlit_prophet/app/dashboard.py`),
+# the repository root is not guaranteed to be on sys.path, which breaks
+# `import streamlit_prophet.*` unless the project is installed.
+import sys
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 import streamlit as st
 from streamlit_prophet.lib.dataprep.clean import clean_df
 from streamlit_prophet.lib.dataprep.format import (
