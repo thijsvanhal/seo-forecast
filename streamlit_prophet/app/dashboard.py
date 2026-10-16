@@ -24,11 +24,13 @@ from streamlit_prophet.lib.dataprep.format import (
     remove_empty_cols,
     resample_df,
 )
+from streamlit_prophet.lib.dataprep.opportunity import prepare_opportunity_df
 from streamlit_prophet.lib.dataprep.split import get_train_set, get_train_val_sets
 from streamlit_prophet.lib.exposition.export import display_save_experiment_button
 from streamlit_prophet.lib.exposition.visualize import (
     plot_components,
     plot_future,
+    plot_opportunity,
     plot_overview,
     plot_performance,
 )
@@ -45,6 +47,7 @@ from streamlit_prophet.lib.inputs.dates import (
     input_val_dates,
 )
 from streamlit_prophet.lib.inputs.eval import input_metrics, input_scope_eval
+from streamlit_prophet.lib.inputs.opportunity import input_opportunity
 from streamlit_prophet.lib.inputs.params import (
     input_holidays_params,
     input_other_params,
@@ -52,6 +55,7 @@ from streamlit_prophet.lib.inputs.params import (
     input_regressors,
     input_seasonality_params,
 )
+from streamlit_prophet.lib.models.opportunity import make_opportunity_forecast
 from streamlit_prophet.lib.models.prophet import forecast_workflow
 from streamlit_prophet.lib.utils.load import load_config
 
@@ -65,6 +69,7 @@ config, instructions, readme = load_config(
 
 # Initialization
 dates: Dict[Any, Any] = dict()
+opportunity: Dict[Any, Any] = dict()
 report: List[Dict[str, Any]] = []
 
 # Info
@@ -177,6 +182,14 @@ if make_future_forecast:
         datasets = input_future_regressors(
             datasets, dates, params, dimensions, load_options, date_col
         )
+    with st.sidebar.expander("Keyword opportunities", expanded=False):
+        opportunity = input_opportunity(
+            config, readme, load_options, resampling, date_col, target_col
+        )
+        if opportunity:
+            opportunity["df"] = prepare_opportunity_df(
+                opportunity, config, load_options, resampling
+            )
 
 # Launch training & forecast
 if st.checkbox(
@@ -246,6 +259,11 @@ if st.checkbox(
     if make_future_forecast:
         st.write("# 4. Future forecast" if evaluate else "# 3. Future forecast")
         report = plot_future(models, forecasts, dates, target_col, cleaning, readme, report, df)
+
+    if make_future_forecast and opportunity:
+        st.write("# 5. Keyword opportunities" if evaluate else "# 4. Keyword opportunities")
+        scenario = make_opportunity_forecast(forecasts["future"], opportunity, dates, resampling)
+        report = plot_opportunity(scenario, df, target_col, config, readme, report)
 
     # Save experiment
     if track_experiments:

@@ -120,6 +120,28 @@ In that case, the model will be trained on the whole dataset and the forecast wi
 forecast_horizon = """
 Length of the period to forecast after the last date available in input dataset.
 """
+opportunity_upload = """
+Optional csv file with keywords you don't rank on yet, in long format: one row per keyword and date,
+with the same separator and date format as the main dataset. All keywords are summed per date.
+Upload it to compare the baseline forecast with a scenario where you rank on these keywords. \n
+The volume of each forecast period is taken from the same period in the file if available,
+otherwise from the same period in the most recent year of the file. 12 months of history is enough.
+"""
+opportunity_volume_column = """
+Column with the volume of each opportunity keyword (e.g. monthly search volume).
+"""
+opportunity_capture_rate = """
+Share of the opportunity volume that ends up in your target once the keywords rank.
+* Keep 100% if the forecasted target is search volume.
+* If the target is clicks or traffic, use the CTR you expect at your target position.
+"""
+opportunity_delay = """
+Number of periods before the new keywords start contributing, e.g. time to publish content and get indexed.
+"""
+opportunity_ramp_up = """
+Number of periods to go linearly from first contribution to the full capture rate.
+Set to 0 to apply the full capture rate right after the delay.
+"""
 holidays_prior_scale = """
 Determines the magnitude of the holidays effect on your predictions.
 """
@@ -264,6 +286,15 @@ This visualization can be read in the same way as the overview plot:
 * The blue line shows the predictions made by the model for the period to be forecasted.
 * The blue shade is a 80% uncertainty interval.
 * The red line is the trend estimated by the model.
+"""
+opportunity = """
+This visualization compares two futures:
+* The __baseline__ is the forecast above, based on your current situation only.
+* The __scenario__ adds the volume of the opportunity keywords on top of it,
+multiplied by the captured share (0 during the delay, then growing linearly up to the capture rate).
+
+The opportunity volume is not learned by the model: it is your own assumption on top of the baseline,
+so its quality depends on the capture rate, delay and ramp-up you entered in the sidebar.
 """
 helper_metrics = """
 The following table and plots allow you to evaluate model performance. Go to the **Evaluation** section of the sidebar if you wish to customize evaluation settings by:

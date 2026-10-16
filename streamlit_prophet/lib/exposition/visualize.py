@@ -370,6 +370,89 @@ def plot_future(
     return report
 
 
+def plot_opportunity(
+    scenario: pd.DataFrame,
+    df: pd.DataFrame,
+    target_col: str,
+    config: Dict[Any, Any],
+    readme: Dict[Any, Any],
+    report: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Plots the baseline forecast against the keyword opportunity scenario, with summary metrics.
+
+    Parameters
+    ----------
+    scenario : pd.DataFrame
+        Dataframe with baseline, uplift and scenario values for each forecast period.
+    df : pd.DataFrame
+        Historical dataframe containing the target variable.
+    target_col : str
+        Name of target column.
+    config : Dict
+        Lib configuration dictionary containing style specifications.
+    readme : Dict
+        Dictionary containing explanations about the graph.
+    report: List[Dict[str, Any]]
+        List of all report components.
+    """
+    display_expander(readme, "opportunity", "More info on this plot")
+    n_missing = int(scenario["opportunity_volume"].isna().sum())
+    if n_missing > 0:
+        st.warning(
+            f"{n_missing} forecast period{'s have' if n_missing > 1 else ' has'} no matching period "
+            f"in the opportunity dataset, no uplift is added there."
+        )
+    colors = config["style"]["colors"]
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(x=df["ds"], y=df["y"], name="Actual", mode="lines", line=dict(color=colors[0]))
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=scenario["ds"],
+            y=scenario["baseline"],
+            name="Baseline forecast",
+            mode="lines",
+            line=dict(color=colors[2]),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=scenario["ds"],
+            y=scenario["scenario"],
+            name="With keyword opportunities",
+            mode="lines",
+            fill="tonexty",
+            line=dict(color=colors[1]),
+        )
+    )
+    fig.update_layout(
+        yaxis_title=target_col,
+        legend_title_text="",
+        height=500,
+        width=800,
+        hovermode="x unified",
+    )
+    st.plotly_chart(fig)
+
+    total_baseline = scenario["baseline"].sum()
+    total_scenario = scenario["scenario"].sum()
+    total_uplift = scenario["uplift"].sum()
+    uplift_pct = total_uplift / total_baseline * 100 if total_baseline != 0 else float("inf")
+    col1, col2, col3 = st.columns(3)
+    col1.metric(label=f"Baseline {target_col}", value=f"{int(round(total_baseline))}")
+    col2.metric(
+        label=f"Scenario {target_col}",
+        value=f"{int(round(total_scenario))}",
+        delta=f"{uplift_pct:.1f}%",
+    )
+    col3.metric(label="Uplift from opportunities", value=f"{int(round(total_uplift))}")
+
+    report.append({"object": fig, "name": "opportunity_forecast", "type": "plot"})
+    report.append({"object": scenario, "name": "opportunity_forecast", "type": "dataset"})
+    return report
+
+
 def plot_forecasts_vs_truth(
     eval_df: pd.DataFrame, target_col: str, use_cv: bool, style: Dict[Any, Any]
 ) -> go.Figure:

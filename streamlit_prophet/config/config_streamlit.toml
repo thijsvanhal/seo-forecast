@@ -65,6 +65,11 @@ M = 6 # Default number of months in validation set if dataset frequency is in mo
 Q = 4 # Default number of quarters in validation set if dataset frequency is in quarters
 Y = 3 # Default number of years in validation set if dataset frequency is in years
 
+[opportunity] # Default assumptions for the keyword opportunity scenario
+capture_rate = 100 # Share (%) of the opportunity volume added to the target once fully ranking
+delay_days = 90 # Time before the new keywords start contributing, converted to dataset frequency
+ramp_up_days = 180 # Time to go from first contribution to full capture, converted to dataset frequency
+
 [split]
 CV = 5 # Default number of cross-validation folds if cross-validation is selected
 gap_train_valid = 1 # Default number of days between training set and validation set
